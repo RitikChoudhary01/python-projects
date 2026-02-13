@@ -1,0 +1,61 @@
+import random
+
+computer = random.randint(1,3)
+print("....ROCK PAPPER SCIOSSOR GAME....")
+dist = {
+    1 : "Rock",
+    2 : "Paper",
+    3 : "scissor"
+}
+for key, value in dist.items():
+    print(f"{key} : {value}")
+def game():
+    user = int(input("enter the your choice : "))
+
+    computer = random.randint(1,3)
+    
+    if computer == user:
+        print("you choosed :", dist[user])
+        print("Computer choose:", dist[computer])
+        print("It's a draw!")
+        return
+    
+    elif (computer == 1 and user == 3):
+        print("you choosed :", dist[user])
+        print("Computer choose:", dist[computer])
+        print("computer win the match!")
+    elif (computer == 1 and user == 2):
+        print("you choosed :", dist[user])
+        print("Computer choose:", dist[computer])
+
+        print("you win the match!")
+    elif (computer == 2 and user == 3):
+        print("you choosed :", dist[user])
+        print("Computer choose:", dist[computer])
+        print("you win the match!")
+
+    elif (computer == 2 and user == 1):
+        print("you choosed :", dist[user])
+        print("Computer choose:", dist[computer])
+        print("computer win the match!")
+
+    elif (computer == 3 and user == 1):
+        print("you choosed :", dist[user])
+        print("Computer choose:", dist[computer])
+        print("you win the match!")
+
+    elif (computer == 3 and user == 2):
+        print("you choosed :", dist[user])
+        print("Computer choose:", dist[computer])
+        print("computer win the match!")
+    else:
+        print("inavlid input try again...")
+   
+if __name__ == "__main__":
+    while True:
+        game()
+
+        again = input("Play again? (y/n): ")
+        if again.lower() != 'y':
+            print("Game exited!")
+            break
