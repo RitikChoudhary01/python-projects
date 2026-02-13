@@ -1,0 +1,31 @@
+def calculator(x, y, opp):
+    match opp:
+        case '+':
+            return f"addition is : {x + y}"
+        case '-':
+            return f"subtraction is : {x - y}"
+        case '*':
+            return f"multiplication is : {x * y}"
+        case '/':
+            if y == 0:
+                return "❌ Division by zero not allowed"
+            return f"division is : {x / y}"
+        case '%':
+            return f"remainder is : {x % y}"
+        case _:
+            return "❌ Invalid operation"
+
+
+while True:
+    a = float(input("enter the 1st digit : "))
+    b = float(input("enter the 2nd digit : "))
+
+    print("+ , - , * , / , %")
+    operation = input("enter the operation : ")
+
+    print(calculator(a, b, operation))
+
+    choice = input("continue? (y/n): ")
+    if choice.lower() != 'y':
+        print("calculator closed 👋")
+        break
