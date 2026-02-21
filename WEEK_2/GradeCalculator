@@ -1,0 +1,124 @@
+import os
+import json
+
+DATA_DIR = "Data"
+FILE_PATH = os.path.join(DATA_DIR, "grade.json" )
+os.makedirs(DATA_DIR, exist_ok=True)
+
+def loadData():
+    if os.path.exists(FILE_PATH):
+        try:
+            with open(FILE_PATH, "r") as file:
+                return json.load(file)
+        except ValueError:
+            return[]
+    return[]
+def saveData():
+    with open(FILE_PATH, "w") as file:
+        json.dump(store, file, indent=2)
+
+
+
+store = loadData()
+
+def menu():
+    print("\n===== STUDENT GRADE SYSTEM =====")
+    print("1. Add Student")
+    print("2. Calculate Results")
+    print("3. view all student grade.")
+    print("5. Exit")
+
+
+
+def processStudent():
+    name = input("enter the your name : ")
+    mark1 = int(input("enter  the 1st sub marks : "))
+    mark2 = int(input("enter the 2nd  sub marks : "))
+    mark3 = int(input("enter the 3rd sub marks : "))
+
+    marks = [mark1,mark2,mark3]
+    marksStore = {
+    "name": name,   
+    "marks": marks
+    }
+
+    store.append(marksStore)
+    saveData()
+    print("successfully add...")
+
+def viewAllStudentGrade():
+    if not store:
+        print("no data found..")
+        return
+    sorted_students = sorted(store, key=lambda x: x["name"].lower())
+    for i, student in enumerate(sorted_students, start=1):
+        print(f"{i}. name : {student['name']}.")
+        print(f" marks : {student['marks']}.")
+        print("-" * 30)
+
+
+    
+
+
+    
+
+def calculateResult():
+    total = 0
+    try:
+        with open(FILE_PATH, "r") as file:
+            data = json.load(file)
+    except FileNotFoundError:
+        print('no data found...')
+        return
+    
+        
+            
+        
+    if not data:
+        print("No student records available.")
+        return
+    
+    for student in data:
+        name = student["name"]
+        marks = student['marks']
+        total = sum(marks)
+        average = total/len(marks)
+        print(f"Name: {name}")
+
+    
+        if average >= 90:
+            grade = "A"
+        elif average >= 80:
+            grade = "B"
+        elif average >= 70:
+            grade = "C"
+        elif average >= 60:
+            grade = "D"
+        else:
+            grade = "F"
+
+        print(f"{name}: {grade}")
+
+        
+        print(f"Average: {average:.2f}")
+        print("-" * 30)
+
+
+
+
+while True:
+    menu()
+    choice = int(input("enter the choice : "))
+    if choice==1:
+        processStudent()
+    elif choice == 2:
+        calculateResult()
+    elif choice==3:
+        viewAllStudentGrade()
+    elif choice==5:
+        break
+    else:
+        print("invalid input..")
+
+
+
