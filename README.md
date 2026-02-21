@@ -55,20 +55,26 @@ This repository documents my journey from **zero to building production-ready AI
 
 ---
 
-## 🔄 Week 2 - APIs & Web (Starting Soon)
+## ## ✅ Week 2 - File Handling & Data Management (Completed)
 
-**Planned Projects:**
-- 🌦️ Weather App (OpenWeatherMap API)
-- 📰 News Aggregator (NewsAPI)
-- 💱 Currency Converter
-- 📊 Data visualization with APIs
+**Duration:** Feb 14-20, 2026  
+**Focus:** JSON, CSV, CRUD operations, Data persistence
 
-**Concepts to Learn:**
-- REST APIs
-- HTTP requests
-- JSON parsing
-- Error handling for network calls
-- API authentication
+**Projects Built:**
+
+1. **Library Management System** - Complete book tracking with issue/return
+2. **Contact Management System** - Professional contact manager with search
+3. **Expense Tracker** - Daily expense tracking with CSV export
+4. **Student Grade Calculator** - Automated grading with file storage
+
+📂 [View Week 2 Projects →](./week-2/)
+
+**Key Learnings:**
+- File I/O operations (JSON + CSV)
+- Data validation patterns
+- CRUD implementation
+- Error handling strategies
+- Production-ready code structure
 
 ---
 
@@ -91,11 +97,11 @@ This repository documents my journey from **zero to building production-ready AI
 ## 📈 Progress Stats
 
 ```
-📅 Days Active:        7
-🎯 Projects Built:     7
+📅 Days Active:        14
+🎯 Projects Built:     11
 💻 Lines of Code:      ~600+
 ⭐ GitHub Stars:       Help me reach 10!
-🔥 Current Streak:     7 days
+🔥 Current Streak:     14 days
 ```
 
 ---
