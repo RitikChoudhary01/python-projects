@@ -1,0 +1,106 @@
+import os
+import csv
+
+# 🔹 Folder & File Setup
+DATA_DIR = "Data"
+FILE_PATH = os.path.join(DATA_DIR, "ExpenseTrackerDATA.csv")
+os.makedirs(DATA_DIR, exist_ok=True)
+
+# 🔹 Ensure File Exists With Header
+def initializeFile():
+    if not os.path.exists(FILE_PATH):
+        with open(FILE_PATH, "w", newline="") as file:
+            writer = csv.writer(file)
+            writer.writerow(["Date", "Category", "Amount", "Description"])
+
+# 🔹 Add Expense
+def addExpense():
+    date = input("Enter date (DD-MM-YYYY): ").strip()
+    category = input("Enter category: ").strip()
+    amount = input("Enter amount: ").strip()
+    description = input("Enter description: ").strip()
+
+    if not date or not category or not amount:
+        print("Date, Category and Amount are required!")
+        return
+
+    try:
+        amount = float(amount)
+    except ValueError:
+        print("Amount must be a number!")
+        return
+
+    with open(FILE_PATH, "a", newline="") as file:
+        writer = csv.writer(file)
+        writer.writerow([date, category, amount, description])
+
+    print("✅ Expense added successfully!")
+
+# 🔹 View Expenses
+def viewExpenses():
+    if not os.path.exists(FILE_PATH):
+        print("No expenses found.")
+        return
+
+    with open(FILE_PATH, "r") as file:
+        reader = csv.reader(file)
+        rows = list(reader)
+
+        if len(rows) <= 1:
+            print("No expenses recorded.")
+            return
+
+        print("\n--- Expense List ---")
+        for i, row in enumerate(rows[1:], start=1):
+            print(f"{i}. Date: {row[0]}")
+            print(f"   Category: {row[1]}")
+            print(f"   Amount: ₹{row[2]}")
+            print(f"   Description: {row[3]}")
+            print("-" * 30)
+
+# 🔹 Calculate Total
+def calculateTotal():
+    total = 0
+
+    if not os.path.exists(FILE_PATH):
+        print("No expenses found.")
+        return
+
+    with open(FILE_PATH, "r") as file:
+        reader = csv.reader(file)
+        next(reader, None)  # Skip header
+
+        for row in reader:
+            try:
+                total += float(row[2])
+            except:
+                pass
+
+    print(f"\n💰 Total Expenses: {total}")
+
+# 🔹 Menu
+def menu():
+    print("\n___ Expense Tracker ___")
+    print("1. Add Expense")
+    print("2. View Expenses")
+    print("3. Show Total")
+    print("4. Exit")
+
+# 🔹 Main Loop
+initializeFile()
+
+while True:
+    menu()
+    choice = input("Enter your choice: ").strip()
+
+    if choice == "1":
+        addExpense()
+    elif choice == "2":
+        viewExpenses()
+    elif choice == "3":
+        calculateTotal()
+    elif choice == "4":
+        print("Exiting program...")
+        break
+    else:
+        print("Invalid choice.")
