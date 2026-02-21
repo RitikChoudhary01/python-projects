@@ -1,0 +1,193 @@
+import os
+import json
+from datetime import datetime
+
+# -------------------- FILE SETUP --------------------
+
+DATA_DIR = "data"
+FILE_PATH = os.path.join(DATA_DIR, "library.json")
+os.makedirs(DATA_DIR, exist_ok=True)
+
+
+# -------------------- LOAD DATA --------------------
+
+def loadLibrary():
+    if os.path.exists(FILE_PATH):
+        try:
+            with open(FILE_PATH, "r") as file:
+                return json.load(file)
+        except json.JSONDecodeError:
+            return []
+    return []
+
+
+# -------------------- SAVE DATA --------------------
+
+def saveLibrary():
+    with open(FILE_PATH, "w") as file:
+        json.dump(library, file, indent=4)
+
+
+library = loadLibrary()
+
+
+# -------------------- VIEW BOOKS --------------------
+
+def viewBooks():
+    if not library:
+        print("No books found!")
+        return
+
+    for i, book in enumerate(library, start=1):
+        print(f"{i}. Name: {book['name']}")
+        print(f"   Author: {book['author']}")
+        print(f"   Book ID: {book['bookId']}")
+        print(f"   Available: {book['available']}")
+        print(f"   Issued To: {book['issued_to']}")
+        print(f"   Added: {book['created_at']}")
+        print("-" * 30)
+
+
+# -------------------- ADD BOOK --------------------
+
+def addBook():
+    name = input("Enter book name: ").strip()
+    author = input("Enter author name: ").strip()
+    bookId = input("Enter book ID: ").strip()
+
+    if not name or not author or not bookId:
+        print("All fields are required!")
+        return
+
+    for book in library:
+        if book["bookId"] == bookId:
+            print("Book ID already exists!")
+            return
+
+    new_book = {
+        "name": name,
+        "author": author,
+        "bookId": bookId,
+        "available": True,
+        "issued_to": None,
+        "created_at": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    }
+
+    library.append(new_book)
+    saveLibrary()
+    print("Book added successfully!")
+
+
+# -------------------- REMOVE BOOK --------------------
+
+def removeBook():
+    bookId = input("Enter book ID to remove: ").strip()
+
+    for book in library:
+        if book["bookId"] == bookId:
+            library.remove(book)
+            saveLibrary()
+            print("Book removed successfully!")
+            return
+\
+    print("Book not found!")
+
+
+# -------------------- ISSUE BOOK --------------------
+
+def issueBook():
+    bookId = input("Enter book ID to issue: ").strip()
+    member_name = input("Enter member name: ").strip()
+
+    if not bookId or not member_name:
+        print("Both fields are required!")
+        
+
+    for book in library:
+        if book["bookId"] == bookId:
+            if not book["available"]:
+                print("Book is already issued!")
+                return
+
+            book["available"] = False
+            book["issued_to"] = member_name
+            saveLibrary()
+            print("Book issued successfully!")
+            return
+
+    print("Book not found!")
+
+
+# -------------------- RETURN BOOK --------------------
+
+def returnBook():
+    bookId = input("Enter book ID to return: ").strip()
+
+    for book in library:
+        if book["bookId"] == bookId:
+            if book["available"]:
+                print("Book is already available!")
+                return
+
+            book["available"] = True
+            book["issued_to"] = None
+            saveLibrary()
+            print("Book returned successfully!")
+            return
+
+    print("Book not found!")
+
+
+# -------------------- SEARCH BOOK --------------------
+
+def searchBook():
+    bookId = input("Enter book ID to search: ").strip()
+
+    for book in library:
+        if book["bookId"] == bookId:
+            print(f"Name: {book['name']}")
+            print(f"Author: {book['author']}")
+            print(f"Available: {book['available']}")
+            print(f"Issued To: {book['issued_to']}")
+            print(f"Added: {book['created_at']}")
+            return
+
+    print("Book not found!")
+
+
+# -------------------- MENU --------------------
+
+def menu():
+    print("\n===== LIBRARY MANAGEMENT SYSTEM =====")
+    print("1. Add Book")
+    print("2. View Books")
+    print("3. Remove Book")
+    print("4. Issue Book")
+    print("5. Return Book")
+    print("6. Search Book")
+    print("7. Exit")
+
+
+# -------------------- MAIN LOOP --------------------
+
+while True:
+    menu()
+    choice = input("Enter your choice: ").strip()
+
+    if choice == "1":
+        addBook()
+    elif choice == "2":
+        viewBooks()
+    elif choice == "3":
+        removeBook()
+    elif choice == "4":
+        issueBook()
+    elif choice == "5":
+        returnBook()
+    elif choice == "6":
+        searchBook()
+    elif choice == "7":
+        print("Exiting system...")
+        break
+    else:
+        print("Invalid choice! Try again.")
