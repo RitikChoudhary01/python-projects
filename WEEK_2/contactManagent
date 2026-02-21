@@ -1,0 +1,213 @@
+import os
+import json
+from datetime import datetime
+
+# -------------------- FILE SETUP --------------------
+
+DATA_DIR = "Data"
+FILE_PATH = os.path.join(DATA_DIR, "contact.json")
+os.makedirs(DATA_DIR, exist_ok=True)
+
+
+# -------------------- LOAD DATA --------------------
+
+def loadContacts():
+    if os.path.exists(FILE_PATH):
+        try:
+            with open(FILE_PATH, "r") as file:
+                return json.load(file)
+        except json.JSONDecodeError:
+            return []
+    return []
+
+
+# -------------------- SAVE DATA --------------------
+
+def saveContacts():
+    with open(FILE_PATH, "w") as file:
+        json.dump(contacts, file, indent=4)
+
+
+contacts = loadContacts()
+
+
+# -------------------- MENU --------------------
+
+def menu():
+    print("\n___ Contact Management System ___")
+    print("1. Add contact")
+    print("2. View contacts")
+    print("3. Search contact")
+    print("4. Remove contact")
+    print("5. Update contact")
+    print("6. Exit")
+
+
+# -------------------- ADD CONTACT --------------------
+
+def addContact():
+    name = input("Enter name: ").strip()
+    phone_no = input("Enter phone number: ").strip()
+    gmail = input("Enter email: ").strip()
+
+    # Validation
+    if not name or not phone_no:
+        print("Name and phone number are required.")
+        return
+
+    if not phone_no.isdigit():
+        print("Phone number must contain only digits.")
+        return
+
+    if gmail and ("@" not in gmail or "." not in gmail):
+        print("Invalid email format.")
+        return
+
+    # Duplicate check
+    for contact in contacts:
+        if contact["phone_no"] == phone_no:
+            print("Contact with this phone number already exists.")
+            return
+
+    contact = {
+        "name": name,
+        "phone_no": phone_no,
+        "gmail": gmail,
+        "created_at": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    }
+
+    contacts.append(contact)
+    saveContacts()
+    print("✅ Contact added successfully!")
+
+
+# -------------------- VIEW CONTACTS --------------------
+
+def viewContact():
+    if not contacts:
+        print("No contact found!")
+        return
+
+    sorted_contacts = sorted(contacts, key=lambda x: x["name"].lower())
+
+    for i, contact in enumerate(sorted_contacts, start=1):
+        print(f"{i}. Name: {contact['name']}")
+        print(f"   Phone: {contact['phone_no']}")
+        print(f"   Email: {contact['gmail']}")
+        print(f"   Added: {contact['created_at']}")
+        print("-" * 30)
+
+
+# -------------------- SEARCH CONTACT --------------------
+
+def searchContact():
+    if not contacts:
+        print("No contact found!")
+        return
+
+    keyword = input("Enter name/phone/email to search: ").strip().lower()
+    found = False
+
+    for i, contact in enumerate(contacts, start=1):
+        if (keyword in contact["name"].lower() or
+            keyword in contact["phone_no"] or
+            keyword in contact["gmail"].lower()):
+
+            print(f"\n{i}. Name: {contact['name']}")
+            print(f"   Phone: {contact['phone_no']}")
+            print(f"   Email: {contact['gmail']}")
+            print("-" * 30)
+            found = True
+
+    if not found:
+        print("No matching contact found.")
+
+
+# -------------------- REMOVE CONTACT --------------------
+
+def removeContact():
+    if not contacts:
+        print("No contact found to remove!")
+        return
+
+    viewContact()
+
+    try:
+        index = int(input("Enter contact number to remove: "))
+        if 1 <= index <= len(contacts):
+            removed = contacts.pop(index - 1)
+            saveContacts()
+            print(f"✅ Contact '{removed['name']}' removed successfully!")
+        else:
+            print("Invalid contact number!")
+    except ValueError:
+        print("Please enter a valid number.")
+
+
+# -------------------- UPDATE CONTACT --------------------
+
+def updateContact():
+    if not contacts:
+        print("No contact found to update!")
+        return
+
+    viewContact()
+
+    try:
+        index = int(input("Enter contact number to update: "))
+
+        if 1 <= index <= len(contacts):
+            contact = contacts[index - 1]
+
+            print("Leave field empty if you don't want to change it.")
+
+            new_name = input("Enter new name: ").strip()
+            new_phone = input("Enter new phone number: ").strip()
+            new_email = input("Enter new email: ").strip()
+
+            if new_phone and not new_phone.isdigit():
+                print("Phone number must contain only digits.")
+                return
+
+            if new_email and ("@" not in new_email or "." not in new_email):
+                print("Invalid email format.")
+                return
+
+            if new_name:
+                contact["name"] = new_name
+            if new_phone:
+                contact["phone_no"] = new_phone
+            if new_email:
+                contact["gmail"] = new_email
+
+            saveContacts()
+            print("✅ Contact updated successfully!")
+
+        else:
+            print("Invalid contact number!")
+
+    except ValueError:
+        print("Please enter a valid number.")
+
+
+# -------------------- MAIN LOOP --------------------
+
+while True:
+    menu()
+    choice = input("Enter your choice: ").strip()
+
+    if choice == "1":
+        addContact()
+    elif choice == "2":
+        viewContact()
+    elif choice == "3":
+        searchContact()
+    elif choice == "4":
+        removeContact()
+    elif choice == "5":
+        updateContact()
+    elif choice == "6":
+        print("Exiting program...")
+        break
+    else:
+        print("Invalid choice. Try again.")
