@@ -1,0 +1,16 @@
+import requests
+
+api_key = "1726e388adae42fdb3e1775252640d8b"
+
+url = f"https://newsapi.org/v2/top-headlines?country=in&apiKey={api_key}"
+
+response = requests.get(url)
+data = response.json()
+
+if data["status"] != "ok":
+    print("Error fetching news")
+else:
+    print("\nTop Headlines:\n")
+    
+    for i, article in enumerate(data["articles"][:5], start=1):
+        print(f"{i}. {article['title']}")
