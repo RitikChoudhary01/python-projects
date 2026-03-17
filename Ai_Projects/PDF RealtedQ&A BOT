@@ -1,0 +1,101 @@
+from groq import Groq
+from dotenv import load_dotenv
+import os
+from pypdf import PdfReader
+
+
+load_dotenv()
+api_key = os.getenv("GROQ_API_KEY")
+if not api_key:
+    raise RuntimeError("please check env")
+client = Groq(api_key=api_key)
+
+system_prompt = """
+  You are an intelligent document assistant.
+
+Your job is to help the user understand and analyze the provided PDF document.
+
+Rules you must follow:
+
+1. Always use the information from the provided document context to answer the user's question.
+2. If the user asks for a summary, generate a clear and concise summary of the relevant document section.
+3. If the user asks about a technical concept, explain it in simple and understandable language while staying faithful to the document.
+4. If the user asks a question that is partially related, combine document information with logical explanation.
+5. If the answer is not present in the document, respond with:
+   "The document does not contain enough information to answer this question."
+6. Never invent facts that are not present in the document.
+7. Keep answers structured and readable.
+
+Response style:
+
+* Use short paragraphs
+* Use bullet points when helpful
+* Provide step-by-step explanations for technical topics
+* Provide examples when explaining complex concepts
+
+Capabilities you support:
+• Document question answering
+• Document summarization
+• Technical explanation
+• Concept clarification
+
+Always prioritize accuracy from the document context.
+              
+                
+                
+  """
+    
+
+
+
+def responseGenrate(question):
+    
+    prompt = f"""
+Document Context:
+{pdf_text[:12000]}
+
+User Question:
+{question}
+
+Answer based on the document above.
+"""
+    
+    
+    response = client.chat.completions.create(
+        model="llama-3.3-70b-versatile",
+        messages=[
+            {"role": "system", "content":system_prompt},
+            {"role": "user", "content":prompt}
+        ],
+        temperature=0.1,
+        stream=True
+    )
+    return response
+
+def pdf_reader(pdf_path):
+    reader = PdfReader(pdf_path)
+    text = ""
+
+    for page in reader.pages:
+        page_text = page.extract_text()
+
+        if page_text:
+            text += page_text
+
+    return text
+
+pdf_path = input("Enter PDF path: ")
+pdf_text = pdf_reader(pdf_path)
+while True:
+    user = input("please enter the what you want : ")
+    extra_text = input("Enter extra text (optional): ").strip()
+    response =responseGenrate(user)
+    print("assistant: ",  end=" ", flush=True)
+    
+    
+    for chunk in response:
+        content = chunk.choices[0].delta.content
+        if content:
+            print(content, end="", flush=True )
+    
+    
