@@ -1,0 +1,60 @@
+import os
+from dotenv import load_dotenv
+
+from langchain_groq import ChatGroq
+from langchain_community.document_loaders import PyPDFLoader
+from langchain_text_splitters import RecursiveCharacterTextSplitter
+from langchain_community.embeddings import HuggingFaceEmbeddings
+from langchain_community.vectorstores import Chroma
+
+# load API key
+load_dotenv()
+if not os.getenv("GROQ_API_KEY"):
+    raise ValueError("API key missing")
+
+# setup model
+llm = ChatGroq(
+    model="llama-3.3-70b-versatile",
+    temperature=0
+)
+
+# load PDF
+loader = PyPDFLoader("./docs/atomicHabits.pdf")
+docs = loader.load()
+
+# split text
+splitter = RecursiveCharacterTextSplitter(
+    chunk_size=1000,
+    chunk_overlap=100
+)
+chunks = splitter.split_documents(docs)
+
+# create embeddings
+embedding_model = HuggingFaceEmbeddings(
+    model_name="all-MiniLM-L6-v2"
+)
+
+# create vector database
+vectorstore = Chroma.from_documents(
+    documents=chunks,
+    embedding=embedding_model,
+    persist_directory="./vector_db"
+)
+
+# query loop
+while True:
+    query = input("Ask (type exit to stop): ")
+
+    if query.lower() == "exit":
+        break
+
+    # search relevant data
+    results = vectorstore.similarity_search(query, k=4)
+    context = [doc.page_content for doc in results]
+
+    # generate answer
+    response = llm.invoke(
+        f"Answer only from this context:\n{context}\n\nQuestion: {query}"
+    )
+
+    print("\nAnswer:\n", response.content)
