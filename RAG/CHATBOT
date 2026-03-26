@@ -1,0 +1,117 @@
+import os
+import sys
+from dotenv import load_dotenv
+from groq import Groq
+
+load_dotenv()
+
+# Disable Chroma telemetry noise in local runs.
+os.environ.setdefault("ANONYMIZED_TELEMETRY", "False")
+
+# 🔑 CHECK API KEY
+if os.getenv("GROQ_API_KEY"):
+    print("✅ GROQ API Key Loaded")
+else:
+    raise ValueError("❌ GROQ API Key missing — check your .env file")
+
+#  LOAD LLM
+GROQ_MODEL = "llama-3.3-70b-versatile"
+groq_client = Groq(api_key=os.getenv("GROQ_API_KEY"))
+
+# 🧠 EMBEDDING MODEL
+try:
+    from langchain_huggingface import HuggingFaceEmbeddings
+except ImportError:
+    from langchain_community.embeddings import HuggingFaceEmbeddings
+
+embedding_model = HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")
+
+# 🗂 VECTOR STORE — SMART LOAD
+try:
+    from langchain_chroma import Chroma
+except ImportError:
+    from langchain_community.vectorstores import Chroma
+
+from chromadb.config import Settings
+
+VECTOR_DIR = "./vector_hf_v2"
+PDF_PATH   = "./docs/atomicHabits.pdf"
+CHROMA_SETTINGS = Settings(anonymized_telemetry=False)
+
+def build_vectorstore():
+    from langchain_community.document_loaders import PyPDFLoader
+    from langchain_text_splitters import RecursiveCharacterTextSplitter
+
+    loader = PyPDFLoader(PDF_PATH)
+    docs   = loader.load()
+    print(f"   ✅ {len(docs)} pages loaded")
+
+    splitter = RecursiveCharacterTextSplitter(
+        chunk_size=1000,
+        chunk_overlap=100
+    )
+    chunks = splitter.split_documents(docs)
+    print(f"   ✅ {len(chunks)} chunks bane")
+
+    vs = Chroma.from_documents(
+        documents=chunks,
+        embedding=embedding_model,
+        persist_directory=VECTOR_DIR,
+        client_settings=CHROMA_SETTINGS,
+    )
+    print("   ✅ Vector DB save\n")
+    return vs
+
+def load_vectorstore():
+    print("⚡ Vector DB already exit...\n")
+    return Chroma(
+        persist_directory=VECTOR_DIR,
+        embedding_function=embedding_model,
+        client_settings=CHROMA_SETTINGS,
+    )
+
+if os.path.exists(VECTOR_DIR) and os.listdir(VECTOR_DIR):
+    vectorstore = load_vectorstore()
+else:
+    vectorstore = build_vectorstore()
+
+#  CHATBOT LOOP
+print("=" * 50)
+print("🤖 RAG Chatbot — Atomic Habits")
+print("   'exit'")
+print("=" * 50)
+
+while True:
+    user_query = input("\n👉 You: ").strip()
+
+    if not user_query:
+        continue
+
+    if user_query.lower() == "exit":
+        print("👋 Bye! Consistency is key 🔑")
+        break
+
+    # Relevant chunks fetch 
+    results = vectorstore.similarity_search(user_query, k=4)
+    context = "\n\n".join([doc.page_content for doc in results])
+
+    prompt = f"""You are an expert assistant on give data Clear.
+Answer ONLY using the context below.
+"
+
+Context:
+{context}
+
+Question:
+{user_query}
+
+give Clear and helpful answer ."""
+
+    completion = groq_client.chat.completions.create(
+        model=GROQ_MODEL,
+        temperature=0,
+        messages=[{"role": "user", "content": prompt}],
+    )
+    answer = completion.choices[0].message.content or "No response generated."
+    print(f"\n🤖 AI: {answer}")
+    print("-" * 50)
